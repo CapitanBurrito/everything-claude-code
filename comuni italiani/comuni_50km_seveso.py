@@ -48,18 +48,23 @@ for el in data.get("elements", []):
 
     lat = center["lat"]
     lon = center["lon"]
+    # Distanza dal centro del bounding box: solo indicativa/per ordinamento.
+    # Overpass ha gia' filtrato i comuni il cui confine reale rientra nei
+    # RADIUS_M richiesti, quindi qui non si ri-filtra: il centro del bbox
+    # puo' cadere oltre RADIUS_KM anche per comuni correttamente inclusi
+    # (es. comuni allungati/irregolari), e ri-escluderli farebbe perdere
+    # comuni validi.
     dist = haversine(SEVESO_LAT, SEVESO_LON, lat, lon)
 
-    if dist <= RADIUS_KM:
-        comuni.append({
-            "nome": nome,
-            "lat": lat,
-            "lon": lon,
-            "distanza_km": round(dist, 2),
-            "istat": tags.get("ref:ISTAT"),
-            "provincia": tags.get("addr:province") or tags.get("is_in:province"),
-            "regione": tags.get("addr:region") or tags.get("is_in:region")
-        })
+    comuni.append({
+        "nome": nome,
+        "lat": lat,
+        "lon": lon,
+        "distanza_km": round(dist, 2),
+        "istat": tags.get("ref:ISTAT"),
+        "provincia": tags.get("addr:province") or tags.get("is_in:province"),
+        "regione": tags.get("addr:region") or tags.get("is_in:region")
+    })
 
 comuni.sort(key=lambda x: x["distanza_km"])
 
